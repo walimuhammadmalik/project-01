@@ -1,3 +1,10 @@
+#my gitignore file
+
+
+znotes.doc
+
+
+
 # Logs
 logs
 *.log
