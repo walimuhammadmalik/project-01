@@ -1,9 +1,31 @@
-import { Controller } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
-import User from 'src/entities/user.entity';
+import {
+  Body,
+  Controller,
+  Get,
+  Patch,
+  Post,
+  Query,
+  Req,
+  Res,
+  UseGuards,
+} from '@nestjs/common';
+import { AuthGuard } from 'src/auth/guard/auth.guard';
+import { UpdateNameDto } from 'src/dtos/update-name.dto';
+import { UserService } from 'src/services/user.service';
 
 @Controller('user')
 export class UserController {
-  constructor(@InjectModel('User') private readonly userModel: Model<User>) {}
+  constructor(private readonly userService: UserService) {}
+
+  @Patch('/update-name')
+  @UseGuards(AuthGuard)
+  async updateName(@Body() name: UpdateNameDto, @Req() req, @Res() res) {
+    return await this.userService.updateName(name, req, res);
+  }
+
+  @Get('/all')
+  @UseGuards(AuthGuard)
+  async getAllUsers(@Query() params, @Req() req, @Res() res) {
+    return await this.userService.getAllUsers(params, req, res);
+  }
 }
