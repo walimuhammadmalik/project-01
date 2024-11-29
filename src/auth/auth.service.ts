@@ -32,7 +32,7 @@ export class AuthService {
   }
 
   async generateOTP() {
-    return crypto.randomInt(10000, 99999);
+    return crypto.randomInt(1000, 9999);
   }
 
   checkPasswordStrength(password: string) {

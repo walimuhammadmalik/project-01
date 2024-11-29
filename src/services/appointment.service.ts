@@ -2,7 +2,7 @@ import { HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { AppointmentStatus } from 'src/constant/appointment.constant';
-import { Role } from 'src/constant/roles.constant';
+import { Role } from 'src/constant/user.constant';
 import Appointment from 'src/entities/appointment.entity';
 import School from 'src/entities/school.entity';
 
@@ -130,7 +130,7 @@ export class AppointmentService {
     try {
       if (req.user.role === Role.SCHOOL_ADMIN) {
         const schoolExists = await this.schoolModel.findOne({
-          schoolAdminId: req.user._id,
+          userId: req.user._id,
         });
 
         if (!schoolExists) {
@@ -173,7 +173,7 @@ export class AppointmentService {
     try {
       if (req.user.role === Role.SCHOOL_ADMIN) {
         const schoolExists = await this.schoolModel.findOne({
-          schoolAdminId: req.user._id,
+          userId: req.user._id,
         });
 
         if (!schoolExists) {

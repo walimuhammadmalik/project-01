@@ -1,22 +1,21 @@
-import { IsEmail, IsEnum, IsNotEmpty } from 'class-validator';
-import { Role } from 'src/constant/roles.constant';
+import { IsEmail, IsNotEmpty, IsOptional } from 'class-validator';
 
 export class UserSignUpDto {
   @IsNotEmpty()
-  firstName: string;
-
-  @IsNotEmpty()
-  lastName: string;
+  name: string;
 
   @IsEmail()
   email: string;
 
-  @IsEnum(Role, {
-    message:
-      'Role must be either USER, PRIVATE_USER, SCHOOL_ADMIN, or SUPER_ADMIN',
-  })
-  role: Role;
+  @IsOptional()
+  address?: string;
+
+  @IsOptional()
+  role?: string;
 
   @IsNotEmpty()
   password: string;
+
+  @IsOptional()
+  confirmPassword?: string;
 }

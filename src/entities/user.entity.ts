@@ -1,17 +1,17 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import * as bcrypt from 'bcrypt';
-import { Role } from 'src/constant/roles.constant';
+import { Role } from 'src/constant/user.constant';
 
 @Schema({ timestamps: true })
 export default class User {
   @Prop()
-  firstName: string;
-
-  @Prop()
-  lastName: string;
+  name: string;
 
   @Prop()
   email: string;
+
+  @Prop()
+  address: string;
 
   @Prop({ enum: Role, default: Role.USER })
   role: Role;
@@ -20,9 +20,6 @@ export default class User {
     set: (password: string) => bcrypt.hashSync(password, 10),
   })
   password: string;
-
-  @Prop({ default: true })
-  isActive: boolean;
 
   @Prop({ default: false })
   isDeleted: boolean;

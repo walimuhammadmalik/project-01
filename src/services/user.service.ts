@@ -7,7 +7,7 @@ import User from 'src/entities/user.entity';
 export class UserService {
   constructor(@InjectModel('User') private readonly userModel: Model<User>) {}
 
-  async updateName(name: any, req: any, res: any) {
+  async updateName(name, req, res) {
     try {
       const user = await this.userModel.findByIdAndUpdate(req.user._id, name, {
         new: true,
@@ -16,6 +16,23 @@ export class UserService {
       const { password, ...data } = user.toObject();
       return res.status(HttpStatus.OK).send({
         message: 'Name updated successfully',
+        data: { data },
+      });
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async setUserType(body, req, res) {
+    try {
+      const user = await this.userModel.findByIdAndUpdate(
+        req.user._id,
+        { role: body.role },
+        { new: true },
+      );
+      const { password, ...data } = user.toObject();
+      return res.status(HttpStatus.OK).send({
+        message: 'User type updated successfully',
         data: { data },
       });
     } catch (error) {

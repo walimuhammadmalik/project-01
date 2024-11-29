@@ -24,8 +24,13 @@ export class SchoolController {
 
   @Post('/')
   @UseGuards(AuthGuard)
-  async registerSchool(@Body() school, @Req() req, @Res() res) {
-    return await this.schoolService.registerSchool(school, req, res);
+  async registerSchool(
+    @Body() school,
+    @Query() params,
+    @Req() req,
+    @Res() res,
+  ) {
+    return await this.schoolService.registerSchool(school, params, req, res);
   }
 
   @Patch('/')
