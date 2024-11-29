@@ -23,6 +23,12 @@ export class UserController {
     return await this.userService.updateName(name, req, res);
   }
 
+  @Patch('/type')
+  @UseGuards(AuthGuard)
+  async setUserType(@Body() body, @Req() req, @Res() res) {
+    return await this.userService.setUserType(body, req, res);
+  }
+
   @Get('/all')
   @UseGuards(AuthGuard)
   async getAllUsers(@Query() params, @Req() req, @Res() res) {

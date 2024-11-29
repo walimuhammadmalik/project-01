@@ -1,7 +1,7 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { Role } from 'src/constant/roles.constant';
+import { Role } from 'src/constant/user.constant';
 import { SchoolStatus } from 'src/constant/school.constant';
 import School from 'src/entities/school.entity';
 
@@ -47,7 +47,7 @@ export class SchoolService {
     }
   }
 
-  async registerSchool(school, req, res) {
+  async registerSchool(school, params, req, res) {
     try {
       if (req.user.role !== Role.SCHOOL_ADMIN) {
         return res
@@ -55,18 +55,24 @@ export class SchoolService {
           .send({ message: 'Unauthorized access', data: {} });
       }
       const schoolExist = await this.schoolModel.findOne({
-        schoolAdminId: req.user._id,
+        userId: req.user._id,
       });
       if (schoolExist) {
         return res
           .status(HttpStatus.BAD_REQUEST)
           .send({ message: 'School already exist', data: {} });
       }
-
+      if (!params.permitType || !Array.isArray(params.permitType)) {
+        return res
+          .status(HttpStatus.BAD_REQUEST)
+          .send({ message: 'Permit type is required', data: {} });
+      }
       const createdSchool = await this.schoolModel.create({
         ...school,
-        schoolAdminId: req.user._id,
+        userId: req.user._id,
       });
+      createdSchool.permitTypes = params.permitType;
+      await createdSchool.save();
       return res
         .status(HttpStatus.CREATED)
         .send({ message: 'School created', data: createdSchool });
@@ -84,7 +90,7 @@ export class SchoolService {
       }
 
       const schoolExist = await this.schoolModel.findOne({
-        schoolAdminId: req.user._id,
+        userId: req.user._id,
       });
 
       if (!schoolExist) {
@@ -118,7 +124,7 @@ export class SchoolService {
       }
 
       const school = await this.schoolModel.find({
-        schoolAdminId: req.user._id,
+        userId: req.user._id,
         isDeleted: false,
       });
       if (school.length === 0) {
@@ -143,7 +149,7 @@ export class SchoolService {
       }
 
       const schoolExist = await this.schoolModel.findOne({
-        schoolAdminId: req.user._id,
+        userId: req.user._id,
       });
 
       if (!schoolExist) {
@@ -177,7 +183,7 @@ export class SchoolService {
       }
 
       const schoolExist = await this.schoolModel.findOne({
-        schoolAdminId: req.user._id,
+        userId: req.user._id,
       });
 
       if (!schoolExist) {
@@ -290,7 +296,7 @@ export class SchoolService {
       }
 
       const schoolExist = await this.schoolModel.findOne({
-        schoolAdminId: req.user._id,
+        userId: req.user._id,
       });
 
       if (!schoolExist) {

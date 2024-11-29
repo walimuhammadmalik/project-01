@@ -4,6 +4,7 @@ import {
   Controller,
   Get,
   HttpStatus,
+  Patch,
   Post,
   Req,
   Res,
@@ -52,7 +53,7 @@ export class AuthController {
 
       const user = await this.userModel.create(userSignUp);
       const token = await this.authService.signToken(user._id);
-      return res.status(HttpStatus.OK).send({
+      return res.status(HttpStatus.CREATED).send({
         message: 'User signed up successfully',
         data: { token: token },
       });
@@ -99,13 +100,11 @@ export class AuthController {
       const query = { email: body.email, isDeleted: false };
       const user = await this.userModel.findOne(query);
       if (!user) {
-        return res.status(HttpStatus.BAD_REQUEST).send({
-          message: 'User not found',
+        return res.status(HttpStatus.NOT_FOUND).send({
+          message: 'User Not found',
           data: {},
         });
       }
-      const token = await this.authService.signToken(user._id);
-      console.log(token);
       const otp = await this.authService.generateOTP();
       console.log(otp);
       await this.userModel.updateOne(query, { otp: otp });
@@ -118,18 +117,45 @@ export class AuthController {
     }
   }
 
-  @Post('/reset')
+  @Patch('/verify-otp')
+  async verifyOTP(@Body() body, @Res() res) {
+    try {
+      const user = await this.userModel.findOne({ email: body.email });
+      if (!user) {
+        return res.status(HttpStatus.NOT_FOUND).send({
+          message: 'User Not found',
+          data: {},
+        });
+      }
+      if (user.otp !== Number(body.otp)) {
+        return res.status(HttpStatus.BAD_REQUEST).send({
+          message: 'Invalid OTP',
+          data: {},
+        });
+      }
+      const token = await this.authService.signToken(user._id);
+      user.otp = null;
+      await user.save();
+      return res.status(HttpStatus.OK).send({
+        message: 'OTP verified successfully',
+        data: { token: token },
+      });
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  @Patch('/reset-password')
   @UseGuards(AuthGuard)
   async resetPassword(@Body() body: resetPasswordDto, @Req() req, @Res() res) {
     try {
       const user = await this.userModel.findById(req.user._id);
-      if (user.otp !== Number(body.otp)) {
+      if (user.otp !== null) {
         return res.status(HttpStatus.BAD_REQUEST).send({
-          message: 'Invalid OTP',
+          message: 'OTP not verified',
           data: { token: 'Unauthorised' },
         });
       }
-
       if (body.password !== body.confirmPassword) {
         return res.status(HttpStatus.BAD_REQUEST).send({
           message: 'Password and Confirm Password should be same',
@@ -146,9 +172,7 @@ export class AuthController {
           data: {},
         });
       }
-
       user.password = body.password;
-      user.otp = null;
       await user.save();
       return res.status(HttpStatus.OK).send({
         message: 'Password reset successfully',
@@ -159,7 +183,7 @@ export class AuthController {
     }
   }
 
-  @Post('update-password')
+  @Patch('/update-password')
   @UseGuards(AuthGuard)
   async updatePassword(
     @Body() body: UpdatePasswordDto,
