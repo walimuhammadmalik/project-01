@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import User from 'src/entities/user.entity';
@@ -14,7 +14,7 @@ export class UserService {
       });
 
       const { password, ...data } = user.toObject();
-      return res.status(200).send({
+      return res.status(HttpStatus.OK).send({
         message: 'Name updated successfully',
         data: { data },
       });
@@ -25,7 +25,7 @@ export class UserService {
 
   async getAllUsers(params: any, req: any, res: any) {
     if (req.user.role !== 'SUPER_ADMIN') {
-      return res.status(401).send({
+      return res.status(HttpStatus.BAD_REQUEST).send({
         message: 'You are not authorized to perform this action',
         data: {},
       });
@@ -43,16 +43,13 @@ export class UserService {
         const { password, ...data } = user.toObject();
         return data;
       });
-      return res.status(200).send({
+      return res.status(HttpStatus.OK).send({
         message: 'Users retrieved successfully',
         count: usersWithoutPassword.length,
         data: usersWithoutPassword,
       });
     } catch (error) {
-      return res.status(500).send({
-        message: 'Error retrieving users',
-        error: error.message,
-      });
+      throw error;
     }
   }
 }

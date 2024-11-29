@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose from 'mongoose';
-import { Status } from 'src/constant/school.constant';
+import { SchoolStatus } from 'src/constant/school.constant';
 
 @Schema({ timestamps: true })
 export default class School {
@@ -17,10 +17,10 @@ export default class School {
   address: string;
 
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User' })
-  adminId: mongoose.Schema.Types.ObjectId;
+  schoolAdminId: mongoose.Schema.Types.ObjectId;
 
-  @Prop({ enum: Status, default: Status.PENDING })
-  status: Status;
+  @Prop({ enum: SchoolStatus, default: SchoolStatus.PENDING })
+  status: SchoolStatus;
 
   @Prop()
   latitude: string;

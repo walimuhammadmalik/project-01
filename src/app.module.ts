@@ -6,6 +6,8 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { mongooseFeatures } from './config/mongoose-features.config';
 import { AuthModule } from './auth/auth.module';
 import { UserModule } from './modules/user.module';
+import { SchoolModule } from './modules/school.module';
+import { AppointmentModule } from './modules/appointment.module';
 
 @Module({
   imports: [
@@ -16,6 +18,8 @@ import { UserModule } from './modules/user.module';
     mongooseFeatures,
     UserModule,
     AuthModule,
+    SchoolModule,
+    AppointmentModule,
   ],
   controllers: [AppController],
   providers: [AppService],

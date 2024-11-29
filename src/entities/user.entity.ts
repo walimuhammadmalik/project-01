@@ -13,7 +13,7 @@ export default class User {
   @Prop()
   email: string;
 
-  @Prop({ enum: Role, default: Role.NORMAL_USER })
+  @Prop({ enum: Role, default: Role.USER })
   role: Role;
 
   @Prop({

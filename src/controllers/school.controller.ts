@@ -5,6 +5,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   Req,
   Res,
   UseGuards,
@@ -16,34 +17,51 @@ import { SchoolService } from 'src/services/school.service';
 export class SchoolController {
   constructor(private readonly schoolService: SchoolService) {}
 
-  @Post('')
+  @Get('/')
+  async getAllSchools(@Query() params, @Res() res) {
+    return await this.schoolService.getAllSchools(params, res);
+  }
+
+  @Post('/')
   @UseGuards(AuthGuard)
   async registerSchool(@Body() school, @Req() req, @Res() res) {
     return await this.schoolService.registerSchool(school, req, res);
   }
 
-  @Patch('/:id')
+  @Patch('/')
   @UseGuards(AuthGuard)
-  async updateSchool(@Body() school, @Param('id') id, @Req() req, @Res() res) {
-    return await this.schoolService.updateSchool(id, school, req, res);
+  async updateSchool(@Body() school, @Req() req, @Res() res) {
+    return await this.schoolService.updateSchool(school, req, res);
   }
 
-  @Get('')
+  @Get('/personal')
   @UseGuards(AuthGuard)
   async getSchool(@Req() req, @Res() res) {
     return await this.schoolService.getSchool(req, res);
   }
 
-  @Patch('/active/:id')
+  @Patch('/active')
   @UseGuards(AuthGuard)
-  async setActiveSchool(@Param('id') id, @Req() req, @Res() res) {
-    return await this.schoolService.setActiveSchool(id, req, res);
+  async setActiveSchool(@Req() req, @Res() res) {
+    return await this.schoolService.setActiveSchool(req, res);
   }
 
-  @Patch('/deactive/:id')
+  @Patch('/deactive')
   @UseGuards(AuthGuard)
-  async setDeactiveSchool(@Param('id') id, @Req() req, @Res() res) {
-    return await this.schoolService.setDeactiveSchool(id, req, res);
+  async setDeactiveSchool(@Req() req, @Res() res) {
+    return await this.schoolService.setDeactiveSchool(req, res);
+  }
+
+  @Patch('/location')
+  @UseGuards(AuthGuard)
+  async setSchoolLocation(@Body() location, @Req() req, @Res() res) {
+    return await this.schoolService.setSchoolLocation(location, req, res);
+  }
+
+  @Get('/pending')
+  @UseGuards(AuthGuard)
+  async pendingSchools(@Req() req, @Res() res) {
+    return await this.schoolService.pendingSchools(req, res);
   }
 
   @Patch('/approve/:id')
@@ -56,11 +74,5 @@ export class SchoolController {
   @UseGuards(AuthGuard)
   async rejectSchool(@Param('id') id, @Req() req, @Res() res) {
     return await this.schoolService.rejectSchool(id, req, res);
-  }
-
-  @Patch('/location/:id')
-  @UseGuards(AuthGuard)
-  async setSchoolLocation(@Param('id') id, @Body() location, @Req() req, @Res() res) {
-    return await this.schoolService.setSchoolLocation(id, location, req, res);
   }
 }

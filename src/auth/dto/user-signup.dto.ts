@@ -13,7 +13,7 @@ export class UserSignUpDto {
 
   @IsEnum(Role, {
     message:
-      'Role must be either NORMAL_USER, PRIVATE_USER, MANAGER, ADMIN, or SUPER_ADMIN',
+      'Role must be either USER, PRIVATE_USER, SCHOOL_ADMIN, or SUPER_ADMIN',
   })
   role: Role;
 
