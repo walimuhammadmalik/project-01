@@ -35,7 +35,7 @@ export default class School {
   userId: mongoose.Schema.Types.ObjectId;
 
   @Prop({ enum: SchoolStatus, default: SchoolStatus.PENDING })
-  status: SchoolStatus;
+  schoolStatus: SchoolStatus;
 
   @Prop({ default: false })
   isActive: boolean;

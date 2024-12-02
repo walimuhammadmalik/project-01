@@ -18,14 +18,20 @@ export class AppointmentController {
 
   @Get('/')
   @UseGuards(AuthGuard)
-  async getAppointments(@Req() req, @Res() res) {
-    return await this.appointmentService.getAppointments(req, res);
+  async getScheduledAppointments(@Req() req, @Res() res) {
+    return await this.appointmentService.getScheduledAppointments(req, res);
   }
 
   @Post('/')
   @UseGuards(AuthGuard)
   async createAppointment(@Body() body, @Req() req, @Res() res) {
     return await this.appointmentService.createAppointment(body, req, res);
+  }
+
+  @Get('/ownself')
+  @UseGuards(AuthGuard)
+  async getOwnselfAppointment(@Req() req, @Res() res) {
+    return await this.appointmentService.getOwnselfAppointment(req, res);
   }
 
   @Patch('/:id')

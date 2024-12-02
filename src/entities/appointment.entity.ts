@@ -8,7 +8,13 @@ import {
 @Schema({ timestamps: true })
 export default class Appointment {
   @Prop()
-  date: Date;
+  title: string;
+
+  @Prop()
+  description: string;
+
+  @Prop()
+  dateTime: Date;
 
   @Prop({ enum: AppointmentType, default: AppointmentType.LESSON })
   appointmentType: AppointmentType;

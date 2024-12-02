@@ -217,7 +217,7 @@ export class SchoolService {
       }
 
       const schools = await this.schoolModel.find({
-        status: SchoolStatus.PENDING,
+        schoolStatus: SchoolStatus.PENDING,
         isDeleted: false,
       });
 
@@ -246,7 +246,7 @@ export class SchoolService {
 
       const approvedSchool = await this.schoolModel.findByIdAndUpdate(
         id,
-        { status: SchoolStatus.APPROVED },
+        { schoolStatus: SchoolStatus.APPROVED },
         { new: true },
       );
 
@@ -275,7 +275,7 @@ export class SchoolService {
 
       const rejectedSchool = await this.schoolModel.findByIdAndUpdate(
         id,
-        { status: SchoolStatus.REJECTED },
+        { schoolStatus: SchoolStatus.REJECTED },
         { new: true },
       );
 

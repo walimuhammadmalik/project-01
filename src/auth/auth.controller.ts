@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   Body,
   Controller,
   Get,
@@ -31,11 +30,15 @@ export class AuthController {
   @Post('/signup')
   async userSignUp(@Body() userSignUp: UserSignUpDto, @Res() res) {
     try {
-      const query = { email: userSignUp.email, isDeleted: false };
+      const query = {
+        email: userSignUp.email,
+        isDeleted: false,
+        isVerified: true,
+      };
       const userExist = await this.userModel.findOne(query);
       if (userExist) {
         return res.status(HttpStatus.BAD_REQUEST).send({
-          message: 'User already exists',
+          message: 'User already exists, Please login or Forgot password',
           data: {},
         });
       }
@@ -51,11 +54,25 @@ export class AuthController {
         });
       }
 
-      const user = await this.userModel.create(userSignUp);
-      const token = await this.authService.signToken(user._id);
+      const queryUser = {
+        email: userSignUp.email,
+        isDeleted: false,
+        isVerified: false,
+      };
+      const otp = await this.authService.generateOTP();
+      const userExists = await this.userModel.findOneAndUpdate(
+        queryUser,
+        { otp: otp },
+        { new: true },
+      );
+      console.log(otp);
+      if (!userExists) {
+        userSignUp.otp = otp;
+        await this.userModel.create(userSignUp);
+      }
       return res.status(HttpStatus.CREATED).send({
-        message: 'User signed up successfully',
-        data: { token: token },
+        message: 'User signed up successfully and OTP sent to email',
+        data: {},
       });
     } catch (error) {
       throw error;
@@ -70,6 +87,12 @@ export class AuthController {
       if (!user) {
         return res.status(HttpStatus.BAD_REQUEST).send({
           message: 'User not found',
+          data: {},
+        });
+      }
+      if (!user.isVerified) {
+        return res.status(HttpStatus.BAD_REQUEST).send({
+          message: 'User not verified',
           data: {},
         });
       }
@@ -135,6 +158,7 @@ export class AuthController {
       }
       const token = await this.authService.signToken(user._id);
       user.otp = null;
+      user.isVerified = true;
       await user.save();
       return res.status(HttpStatus.OK).send({
         message: 'OTP verified successfully',

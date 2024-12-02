@@ -14,7 +14,7 @@ export class AppointmentService {
     @InjectModel('School') private readonly schoolModel: Model<School>,
   ) {}
 
-  async getAppointments(req, res) {
+  async getOwnselfAppointment(req, res) {
     try {
       if (req.user.role === Role.USER || req.user.role === Role.PRIVATE_USER) {
         const appointments = await this.appointmentModel
@@ -38,6 +38,37 @@ export class AppointmentService {
       }
       return res.status(HttpStatus.FORBIDDEN).send({
         message: 'You are not authorized to fetch appointments',
+      });
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async getScheduledAppointments(req, res) {
+    try {
+      if (req.user.role !== Role.SCHOOL_ADMIN) {
+        return res.status(HttpStatus.FORBIDDEN).send({
+          message: 'You are not authorized to fetch appointments',
+        });
+      }
+      const appointments = await this.appointmentModel
+        .find({
+          userId: req.user._id,
+          isDeleted: false,
+          appointmentStatus: AppointmentStatus.SCHEDULED,
+        })
+        .select('date appointmentType appointmentStatus schoolId');
+
+      if (!appointments) {
+        return res.status(HttpStatus.NOT_FOUND).send({
+          message: 'No appointments found',
+          data: {},
+        });
+      }
+
+      return res.status(HttpStatus.OK).send({
+        message: 'Appointments fetched successfully',
+        date: appointments,
       });
     } catch (error) {
       throw error;
@@ -206,5 +237,4 @@ export class AppointmentService {
       throw error;
     }
   }
-
 }

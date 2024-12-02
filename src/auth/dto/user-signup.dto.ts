@@ -18,4 +18,7 @@ export class UserSignUpDto {
 
   @IsOptional()
   confirmPassword?: string;
+
+  @IsOptional()
+  otp?: number;
 }
