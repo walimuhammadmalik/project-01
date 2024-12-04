@@ -17,9 +17,6 @@ export default class School {
   city: string;
 
   @Prop()
-  address: string;
-
-  @Prop()
   latitude: string;
 
   @Prop()

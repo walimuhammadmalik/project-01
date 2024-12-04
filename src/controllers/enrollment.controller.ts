@@ -24,8 +24,8 @@ export class EnrollmentController {
 
   @Get('/')
   @UseGuards(AuthGuard)
-  async getEnrollments(@Req() req, @Res() res) {
-    return await this.enrollmentService.getEnrollments(req, res);
+  async getEnrolled(@Req() req, @Res() res) {
+    return await this.enrollmentService.getEnrolled(req, res);
   }
 
   @Get('/pending')

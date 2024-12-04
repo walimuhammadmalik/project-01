@@ -5,6 +5,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   Req,
   Res,
   UseGuards,
@@ -18,36 +19,33 @@ export class AppointmentController {
 
   @Get('/')
   @UseGuards(AuthGuard)
-  async getScheduledAppointments(@Req() req, @Res() res) {
-    return await this.appointmentService.getScheduledAppointments(req, res);
+  async getSchoolScheduledAppointments(@Req() req, @Res() res) {
+    return await this.appointmentService.getSchoolScheduledAppointments(
+      req,
+      res,
+    );
   }
 
   @Post('/')
   @UseGuards(AuthGuard)
-  async createAppointment(@Body() body, @Req() req, @Res() res) {
-    return await this.appointmentService.createAppointment(body, req, res);
+  async createAppointment(
+    @Body() body,
+    @Query() params,
+    @Req() req,
+    @Res() res,
+  ) {
+    return await this.appointmentService.createAppointment(
+      body,
+      params,
+      req,
+      res,
+    );
   }
 
   @Get('/ownself')
   @UseGuards(AuthGuard)
   async getOwnselfAppointment(@Req() req, @Res() res) {
     return await this.appointmentService.getOwnselfAppointment(req, res);
-  }
-
-  @Patch('/:id')
-  @UseGuards(AuthGuard)
-  async rescheduleAppointment(
-    @Body() body,
-    @Param('id') id,
-    @Req() req,
-    @Res() res,
-  ) {
-    return await this.appointmentService.rescheduleAppointment(
-      id,
-      body,
-      req,
-      res,
-    );
   }
 
   @Patch('/status/:id')

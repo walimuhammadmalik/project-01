@@ -17,6 +17,12 @@ import { UserService } from 'src/services/user.service';
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
+  @Get('/ownself')
+  @UseGuards(AuthGuard)
+  async getOwnself(@Req() req, @Res() res) {
+    return await this.userService.getOwnself(req, res);
+  }
+
   @Patch('/update-name')
   @UseGuards(AuthGuard)
   async updateName(@Body() name: UpdateNameDto, @Req() req, @Res() res) {

@@ -4,11 +4,13 @@ import { Model } from 'mongoose';
 import { Role } from 'src/constant/user.constant';
 import { SchoolStatus } from 'src/constant/school.constant';
 import School from 'src/entities/school.entity';
+import User from 'src/entities/user.entity';
 
 @Injectable()
 export class SchoolService {
   constructor(
     @InjectModel('School') private readonly schoolModel: Model<School>,
+    @InjectModel('User') private readonly userModel: Model<User>,
   ) {}
 
   async getAllSchools(params, res) {
@@ -20,7 +22,7 @@ export class SchoolService {
       search = search || '';
       const query = {
         isDeleted: false,
-        status: SchoolStatus.APPROVED,
+        schoolStatus: SchoolStatus.APPROVED,
         isActive: true,
         $or: [
           { schoolName: { $regex: search, $options: 'i' } },
@@ -29,10 +31,10 @@ export class SchoolService {
       };
       const schools = await this.schoolModel
         .find(query)
-        .select('schoolName description contact address')
+        .select('userId phoneNumber permitTypes price city')
         .skip(skip)
-        .limit(limit);
-
+        .limit(limit)
+        .populate('userId', 'name email address');
       return res.status(HttpStatus.OK).send({
         message: 'Schools found',
         data: {
@@ -62,13 +64,17 @@ export class SchoolService {
           .status(HttpStatus.BAD_REQUEST)
           .send({ message: 'School already exist', data: {} });
       }
-      if (!params.permitType || !Array.isArray(params.permitType)) {
+      if (!params.permitType) {
         return res
           .status(HttpStatus.BAD_REQUEST)
           .send({ message: 'Permit type is required', data: {} });
       }
+      await this.userModel.findByIdAndUpdate(req.user._id, {
+        address: school.address,
+      });
+      const { address, ...schoolData } = school;
       const createdSchool = await this.schoolModel.create({
-        ...school,
+        ...schoolData,
         userId: req.user._id,
       });
       createdSchool.permitTypes = params.permitType;

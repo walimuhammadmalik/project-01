@@ -19,7 +19,7 @@ export default class Appointment {
   @Prop({ enum: AppointmentType, default: AppointmentType.LESSON })
   appointmentType: AppointmentType;
 
-  @Prop({ enum: AppointmentStatus, default: AppointmentStatus.PENDING })
+  @Prop({ enum: AppointmentStatus, default: AppointmentStatus.SCHEDULED })
   appointmentStatus: AppointmentStatus;
 
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User' })

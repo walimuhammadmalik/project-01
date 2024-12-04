@@ -1,6 +1,5 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { count } from 'console';
 import { Model } from 'mongoose';
 import { EnrollmentStatus } from 'src/constant/enrollment.constant';
 import { Role } from 'src/constant/user.constant';
@@ -96,26 +95,29 @@ export class EnrollmentService {
     }
   }
 
-  async getEnrollments(req, res) {
+  async getEnrolled(req, res) {
     try {
       if (req.user.role !== Role.SCHOOL_ADMIN) {
         return res.status(HttpStatus.UNAUTHORIZED).send({
           message: 'Unauthorized access',
+          data: {},
         });
       }
       const school = await this.schoolModel.findOne({ userId: req.user._id });
       if (!school) {
         return res.status(HttpStatus.NOT_FOUND).send({
           message: 'School not found',
+          data: {},
         });
       }
       const enrollments = await this.enrollmentModel
         .find({
           schoolId: school._id,
+          enrollmentStatus: EnrollmentStatus.APPROVED,
         })
         .select('userId enrollmentStatus -_id');
       return res.status(HttpStatus.OK).send({
-        message: 'Enrollments fetched successfully',
+        message: 'Enrolled students fetched successfully',
         data: { count: enrollments.length, enrollments: enrollments },
       });
     } catch (error) {

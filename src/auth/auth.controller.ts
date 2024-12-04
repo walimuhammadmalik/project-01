@@ -38,7 +38,7 @@ export class AuthController {
       const userExist = await this.userModel.findOne(query);
       if (userExist) {
         return res.status(HttpStatus.BAD_REQUEST).send({
-          message: 'User already exists, Please login or Forgot password',
+          message: 'Email already registered.',
           data: {},
         });
       }
@@ -71,7 +71,7 @@ export class AuthController {
         await this.userModel.create(userSignUp);
       }
       return res.status(HttpStatus.CREATED).send({
-        message: 'User signed up successfully and OTP sent to email',
+        message: 'User registered successfully.',
         data: {},
       });
     } catch (error) {
@@ -84,32 +84,19 @@ export class AuthController {
     try {
       const query = { email: userLogin.email, isDeleted: false };
       const user = await this.userModel.findOne(query);
-      if (!user) {
-        return res.status(HttpStatus.BAD_REQUEST).send({
-          message: 'User not found',
-          data: {},
-        });
-      }
-      if (!user.isVerified) {
-        return res.status(HttpStatus.BAD_REQUEST).send({
-          message: 'User not verified',
-          data: {},
-        });
-      }
       const isPasswordMatched = await bcrypt.compare(
         userLogin.password,
         user.password,
       );
-
       if (!isPasswordMatched) {
         return res.status(HttpStatus.BAD_REQUEST).send({
-          message: 'incorrect credential',
+          message: 'Invalid credential',
           data: {},
         });
       }
       const token = await this.authService.signToken(user._id);
       return res.status(HttpStatus.OK).send({
-        message: 'User Found and Logged in successfully',
+        message: 'Logged in successfully',
         data: { token: token },
       });
     } catch (error) {
@@ -117,7 +104,7 @@ export class AuthController {
     }
   }
 
-  @Post('/forgot')
+  @Post('/forgot-password')
   async forgotPassword(@Body() body, @Res() res) {
     try {
       const query = { email: body.email, isDeleted: false };
@@ -140,7 +127,7 @@ export class AuthController {
     }
   }
 
-  @Patch('/verify-otp')
+  @Patch('/verify-code')
   async verifyOTP(@Body() body, @Res() res) {
     try {
       const user = await this.userModel.findOne({ email: body.email });
@@ -256,12 +243,12 @@ export class AuthController {
     }
   }
 
-  @Get('/verify')
+  @Get('/verify-token')
   @UseGuards(AuthGuard)
-  async verifyToken(@Req() req) {
-    return {
+  async verifyToken(@Req() req, @Res() res) {
+    return res.status(HttpStatus.OK).send({
       message: 'Token verified',
       data: req.user,
-    };
+    });
   }
 }

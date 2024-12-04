@@ -7,6 +7,18 @@ import User from 'src/entities/user.entity';
 export class UserService {
   constructor(@InjectModel('User') private readonly userModel: Model<User>) {}
 
+  async getOwnself(req, res) {
+    try {
+      const { password, otp, ...data } = req.user;
+      return res.status(HttpStatus.OK).send({
+        message: 'User retrieved successfully',
+        data,
+      });
+    } catch (error) {
+      throw error;
+    }
+  }
+
   async updateName(name, req, res) {
     try {
       const user = await this.userModel.findByIdAndUpdate(req.user._id, name, {

@@ -3,9 +3,7 @@ export enum AppointmentType {
   EXAM = 'EXAM',
 }
 export enum AppointmentStatus {
-  PENDING = 'PENDING',
   SCHEDULED = 'SCHEDULED',
   COMPLETED = 'COMPLETED',
   CANCELLED = 'CANCELLED',
-  RESCHEDULED = 'RESCHEDULED',
 }
