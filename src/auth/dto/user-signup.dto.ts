@@ -1,10 +1,10 @@
 import { IsEmail, IsNotEmpty, IsOptional } from 'class-validator';
 
 export class UserSignUpDto {
-  @IsNotEmpty()
+  @IsNotEmpty({ message: 'Name is required.' })
   name: string;
 
-  @IsEmail()
+  @IsEmail({}, { message: 'Invalid email format.' })
   email: string;
 
   @IsOptional()
@@ -13,9 +13,12 @@ export class UserSignUpDto {
   @IsOptional()
   role?: string;
 
-  @IsNotEmpty()
+  @IsNotEmpty({ message: 'Password must be at least 8 characters' })
   password: string;
 
   @IsOptional()
   confirmPassword?: string;
+
+  @IsOptional()
+  otp?: number;
 }

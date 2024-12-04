@@ -9,6 +9,7 @@ import { UserModule } from './modules/user.module';
 import { SchoolModule } from './modules/school.module';
 import { AppointmentModule } from './modules/appointment.module';
 import { EnrollmentModule } from './modules/enrollment.module';
+import { ExamModule } from './modules/exam.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -21,6 +22,7 @@ import { EnrollmentModule } from './modules/enrollment.module';
     SchoolModule,
     AppointmentModule,
     EnrollmentModule,
+    ExamModule,
   ],
   controllers: [AppController],
   providers: [AppService],

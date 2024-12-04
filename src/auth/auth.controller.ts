@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   Body,
   Controller,
   Get,
@@ -31,11 +30,15 @@ export class AuthController {
   @Post('/signup')
   async userSignUp(@Body() userSignUp: UserSignUpDto, @Res() res) {
     try {
-      const query = { email: userSignUp.email, isDeleted: false };
+      const query = {
+        email: userSignUp.email,
+        isDeleted: false,
+        isVerified: true,
+      };
       const userExist = await this.userModel.findOne(query);
       if (userExist) {
         return res.status(HttpStatus.BAD_REQUEST).send({
-          message: 'User already exists',
+          message: 'Email already registered.',
           data: {},
         });
       }
@@ -51,11 +54,25 @@ export class AuthController {
         });
       }
 
-      const user = await this.userModel.create(userSignUp);
-      const token = await this.authService.signToken(user._id);
+      const queryUser = {
+        email: userSignUp.email,
+        isDeleted: false,
+        isVerified: false,
+      };
+      const otp = await this.authService.generateOTP();
+      const userExists = await this.userModel.findOneAndUpdate(
+        queryUser,
+        { otp: otp },
+        { new: true },
+      );
+      console.log(otp);
+      if (!userExists) {
+        userSignUp.otp = otp;
+        await this.userModel.create(userSignUp);
+      }
       return res.status(HttpStatus.CREATED).send({
-        message: 'User signed up successfully',
-        data: { token: token },
+        message: 'User registered successfully.',
+        data: {},
       });
     } catch (error) {
       throw error;
@@ -67,26 +84,19 @@ export class AuthController {
     try {
       const query = { email: userLogin.email, isDeleted: false };
       const user = await this.userModel.findOne(query);
-      if (!user) {
-        return res.status(HttpStatus.BAD_REQUEST).send({
-          message: 'User not found',
-          data: {},
-        });
-      }
       const isPasswordMatched = await bcrypt.compare(
         userLogin.password,
         user.password,
       );
-
       if (!isPasswordMatched) {
         return res.status(HttpStatus.BAD_REQUEST).send({
-          message: 'incorrect credential',
+          message: 'Invalid credential',
           data: {},
         });
       }
       const token = await this.authService.signToken(user._id);
       return res.status(HttpStatus.OK).send({
-        message: 'User Found and Logged in successfully',
+        message: 'Logged in successfully',
         data: { token: token },
       });
     } catch (error) {
@@ -94,7 +104,7 @@ export class AuthController {
     }
   }
 
-  @Post('/forgot')
+  @Post('/forgot-password')
   async forgotPassword(@Body() body, @Res() res) {
     try {
       const query = { email: body.email, isDeleted: false };
@@ -117,7 +127,7 @@ export class AuthController {
     }
   }
 
-  @Patch('/verify-otp')
+  @Patch('/verify-code')
   async verifyOTP(@Body() body, @Res() res) {
     try {
       const user = await this.userModel.findOne({ email: body.email });
@@ -135,6 +145,7 @@ export class AuthController {
       }
       const token = await this.authService.signToken(user._id);
       user.otp = null;
+      user.isVerified = true;
       await user.save();
       return res.status(HttpStatus.OK).send({
         message: 'OTP verified successfully',
@@ -232,12 +243,12 @@ export class AuthController {
     }
   }
 
-  @Get('/verify')
+  @Get('/verify-token')
   @UseGuards(AuthGuard)
-  async verifyToken(@Req() req) {
-    return {
+  async verifyToken(@Req() req, @Res() res) {
+    return res.status(HttpStatus.OK).send({
       message: 'Token verified',
       data: req.user,
-    };
+    });
   }
 }

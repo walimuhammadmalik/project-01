@@ -22,6 +22,9 @@ export default class User {
   password: string;
 
   @Prop({ default: false })
+  isVerified: boolean;
+
+  @Prop({ default: false })
   isDeleted: boolean;
 
   @Prop({ default: false })

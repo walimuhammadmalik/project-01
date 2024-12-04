@@ -14,7 +14,7 @@ export class AppointmentService {
     @InjectModel('School') private readonly schoolModel: Model<School>,
   ) {}
 
-  async getAppointments(req, res) {
+  async getOwnselfAppointment(req, res) {
     try {
       if (req.user.role === Role.USER || req.user.role === Role.PRIVATE_USER) {
         const appointments = await this.appointmentModel
@@ -44,16 +44,66 @@ export class AppointmentService {
     }
   }
 
-  async createAppointment(body, req, res) {
+  async getSchoolScheduledAppointments(req, res) {
     try {
-      if (req.user.role === Role.USER || req.user.role === Role.PRIVATE_USER) {
-        const appointment = await this.appointmentModel.create({
-          ...body,
+      if (req.user.role !== Role.SCHOOL_ADMIN) {
+        return res.status(HttpStatus.FORBIDDEN).send({
+          message: 'You are not authorized to fetch appointments',
+        });
+      }
+      const appointments = await this.appointmentModel
+        .find({
+          userId: req.user._id,
+          isDeleted: false,
+          appointmentStatus: AppointmentStatus.SCHEDULED,
+        })
+        .select('date appointmentType appointmentStatus schoolId');
+
+      if (!appointments) {
+        return res.status(HttpStatus.NOT_FOUND).send({
+          message: 'No appointments found',
+          data: {},
+        });
+      }
+
+      return res.status(HttpStatus.OK).send({
+        message: 'Appointments fetched successfully',
+        date: appointments,
+      });
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async createAppointment(body, params, req, res) {
+    try {
+      if (req.user.role === Role.SCHOOL_ADMIN) {
+        const schoolExists = await this.schoolModel.findOne({
           userId: req.user._id,
         });
+        if (!schoolExists) {
+          return res.status(HttpStatus.NOT_FOUND).send({
+            message: 'School not found',
+            data: {},
+          });
+        }
+        const appointments = [];
+        const userIds = Array.isArray(params.userId)
+          ? params.userId
+          : [params.userId];
+
+        for (const userId of userIds) {
+          const appointment = await this.appointmentModel.create({
+            body,
+            userId: userId,
+            schoolId: schoolExists._id,
+          });
+          appointments.push(appointment);
+        }
+
         return res.status(HttpStatus.CREATED).send({
           message: 'Appointment created successfully',
-          data: appointment,
+          data: appointments,
         });
       }
       return res.status(HttpStatus.FORBIDDEN).send({
@@ -64,43 +114,14 @@ export class AppointmentService {
     }
   }
 
-  async rescheduleAppointment(id, body, req, res) {
-    try {
-      if (req.user.role === Role.USER || req.user.role === Role.PRIVATE_USER) {
-        const appointment = await this.appointmentModel.findOne({
-          _id: id,
-          userId: req.user._id,
-        });
-
-        if (!appointment) {
-          return res.status(HttpStatus.NOT_FOUND).send({
-            message: 'Appointment not found',
-            data: {},
-          });
-        }
-
-        const updatedAppointment =
-          await this.appointmentModel.findByIdAndUpdate(id, body, {
-            new: true,
-          });
-
-        return res.status(HttpStatus.OK).send({
-          message: 'Appointment updated successfully',
-          data: updatedAppointment,
-        });
-      }
-    } catch (error) {
-      throw error;
-    }
-  }
-
   async cancelAppointment(id, req, res) {
     try {
-      if (req.user.role === Role.USER || req.user.role === Role.PRIVATE_USER) {
-        const appointment = await this.appointmentModel.findOne({
-          _id: id,
-          userId: req.user._id,
-        });
+      if (req.user.role === Role.SCHOOL_ADMIN) {
+        const appointment = await this.appointmentModel.findByIdAndUpdate(
+          id,
+          { appointmentStatus: AppointmentStatus.CANCELLED },
+          { new: true },
+        );
 
         if (!appointment) {
           return res.status(HttpStatus.NOT_FOUND).send({
@@ -108,17 +129,10 @@ export class AppointmentService {
             data: {},
           });
         }
-
-        const updatedAppointment =
-          await this.appointmentModel.findByIdAndUpdate(
-            id,
-            { appointmentStatus: AppointmentStatus.CANCELLED },
-            { new: true },
-          );
 
         return res.status(HttpStatus.OK).send({
           message: 'Appointment cancelled successfully',
-          data: updatedAppointment,
+          data: appointment,
         });
       }
     } catch (error) {
@@ -168,43 +182,4 @@ export class AppointmentService {
       throw error;
     }
   }
-
-  async getSchoolPendingAppointments(req, res) {
-    try {
-      if (req.user.role === Role.SCHOOL_ADMIN) {
-        const schoolExists = await this.schoolModel.findOne({
-          userId: req.user._id,
-        });
-
-        if (!schoolExists) {
-          return res.status(HttpStatus.NOT_FOUND).send({
-            message: 'School not found',
-            data: {},
-          });
-        }
-
-        const appointments = await this.appointmentModel
-          .find({
-            schoolId: schoolExists._id,
-            appointmentStatus: AppointmentStatus.PENDING,
-          })
-          .select('date appointmentType appointmentStatus userId');
-
-        if (!appointments) {
-          return res.status(HttpStatus.NOT_FOUND).send({
-            message: 'No pending appointments found',
-            data: {},
-          });
-        }
-
-        return res.status(HttpStatus.OK).send({
-          message: 'Pending appointments fetched successfully',
-          data: appointments,
-        });
-      }
-    } catch (error) {
-      throw error;
-    }
-  }
-
 }

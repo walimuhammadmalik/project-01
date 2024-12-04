@@ -17,9 +17,6 @@ export default class School {
   city: string;
 
   @Prop()
-  address: string;
-
-  @Prop()
   latitude: string;
 
   @Prop()
@@ -35,7 +32,7 @@ export default class School {
   userId: mongoose.Schema.Types.ObjectId;
 
   @Prop({ enum: SchoolStatus, default: SchoolStatus.PENDING })
-  status: SchoolStatus;
+  schoolStatus: SchoolStatus;
 
   @Prop({ default: false })
   isActive: boolean;
